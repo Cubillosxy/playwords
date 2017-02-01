@@ -1,8 +1,8 @@
 # PlayWords
 =============
-```
-![PlayWords](http://robotika.cz/robots/katarina/katarina.jpg)
-```
+
+![PlayWords](https://github.com/Cubillosxy/playwords/blob/master/biblio/Playwords_v.jpg)
+
 ```
 A simple program on Python , this use Tkinter 
 ```
