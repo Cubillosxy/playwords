@@ -2,7 +2,8 @@
 =============
 A simple program on Python , this use Tkinter 
 
-=Playwords is just a code that you can run this use a GUI on Tkinter also use a dicctionary (file.cfg) to save the words. 
+=
+Playwords is just a code that you can run this use a GUI on Tkinter also use a dicctionary (file.cfg) to save the words. 
 
 
 # Notes
