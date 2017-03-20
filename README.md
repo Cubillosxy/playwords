@@ -4,9 +4,10 @@
 ![PlayWords](https://github.com/Cubillosxy/playwords/blob/master/biblio/Playwords_v.jpg)
 
 ```
-A simple program on Python , this use Tkinter 
+Program for practice new words spanish/english
+
 ```
-=
+==
 Playwords is just a code that you can run, this use a GUI on Tkinter also use a dicctionary (file.cfg) to save the words. 
 
 
