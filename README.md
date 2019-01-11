@@ -5,18 +5,22 @@
 
 ```
 Program for practice new words spanish/english
-
 ```
-==
+
 Playwords is just a code that you can run, this use a GUI on Tkinter also use a dicctionary (file.cfg) to save the words. 
-
-
-# Notes
-This  project is *work in progress* 
 
 Requirements:
 * Python 2.X 
+* Tkinter 
 
-#Questions?
+### Docker
+```
+apt-get install x11-xserver-utils
+xhost +
+docker build -t playwords .
+docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix  playwords
+```
+
+# Questions?
 
 Edwin Cubillos Bohorquez, Colombia : [edwin.cubillos@uptc.edu.co]
