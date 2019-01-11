@@ -34,8 +34,6 @@ class dicc():
 		#edición
 		#self.config.set("stuck", "word2","estancado")
 		#self.config.set("piping", "word0","tubería")
-		self.config.set("raise", "word1","elevar")
-		self.config.set("raise", "word2","levantar")
 
 		##eliminación manual
 		#self.config.remove_section("square")

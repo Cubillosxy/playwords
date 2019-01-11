@@ -1,0 +1,11 @@
+version: '2'
+services:
+ play:
+  build: .
+  image: playwords
+  command: python playenglish.py
+  env_file: .env
+  ports:
+   - "9000:8000"
+  volumes:
+   - .:/code
