@@ -1,11 +1,13 @@
 version: '2'
 services:
  play:
-  build: .
-  image: playwords
+  build:
+   context: .
+   dockerfile: Dockerfile.compose
+  image: playwords_c
   command: python playenglish.py
-  env_file: .env
-  ports:
-   - "9000:8000"
+  environment:
+   DISPLAY: :0
   volumes:
    - .:/code
+   - /tmp/.X11-unix:/tmp/.X11-unix
