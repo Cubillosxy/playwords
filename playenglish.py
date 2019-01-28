@@ -8,25 +8,44 @@
 
 """
 try: #Python 2.x
-    from ConfigParser import ConfigParser
-    import random 
-    from Tkinter import *
-    import ttk
-    import tkMessageBox
-    import sys
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
+	try:
+		from ConfigParser import ConfigParser
+	except ImportError:
+		from configparser import ConfigParser
+	import random
+	from Tkinter import Tk
+	from Tkinter import Frame
+	from Tkinter import StringVar
+	from Tkinter import Menu
+	from Tkinter import PhotoImage
+	from Tkinter import Button
+	from Tkinter import Label
+	from Tkinter import Entry
+	from Tkinter import HORIZONTAL
+	from Tkinter import TOP
+	from Tkinter import BOTH
+	from Tkinter import BOTTOM
+	import ttk
+	import tkMessageBox
+	import sys
+	reload(sys)
+	sys.setdefaultencoding('utf-8')
+
 except ImportError:
-    # Python 3
-    from configparser import ConfigParser
-    import Random 
+	# Python 3
+	from configparser import ConfigParser
+	import Random
+
+import re
 
 
 class dicc():
 	def __init__(self):
 		# Creamos una instancia de la clase y abrimos el archivo
 		self.config = ConfigParser()
-		self.config.read("dicc.cfg")
+		self._filename = 'dicc.cfg'
+		self.sections = None
+		self.config.read(self._filename)
 		sections = self.config.sections() 
 
 		val = len(sections)
@@ -53,80 +72,82 @@ class dicc():
 		#print "numero de secc ",val
 		try:
 			self.config.getint("INDICE", "cant")
-			self.config.set("INDICE", "cant",str(val-1))
-			with open("dicc.cfg", "w") as f:
+			self.config.set("INDICE", "cant", str(val-1))
+			with open(self._filename, "w") as f:
 				self.config.write(f)
-		except:
+		except Exception as e:
+			print(repr(e))
 			self.config.add_section("INDICE")  #adicyaionamos palabra
-			self.config.set("INDICE", "cant","0")
-			with open("dicc.cfg", "w") as f:
+			self.config.set("INDICE", "cant", "0")
+			with open(self._filename, "w") as f:
 				self.config.write(f)
 
-	def del_sp(self,word):
+	def del_sp(self, word):
 		esp = word.find(" ")
 		if esp >= 0:		#si contiene algún espacio se elimina el espacio
 			res = word.split(" ")
 			word = ""
 			for i in res:
-				word = word+str(i)	#une todos los elementos de la lista, conviertiendolos en una cadena
+				word = word + str(i)	#une todos los elementos de la lista, conviertiendolos en una cadena
 		word = word.lower()  # convertir a minuscula todo
 		return word
 
 		#recive la palabra y sus significados
-	def write(self,word,args):
+	def write(self, word, args):
 		ind = self.config.getint("INDICE", "cant")
 		sections = self.config.sections() 
 
-		word=self.del_sp(word)  #llamamos 
+		word = self.del_sp(word)  #llamamos
 	
-		#Buscamos para ver si ya existe 
-		
-		for i in sections: 
-			if word == i:
-				return False
+		#Buscamos para ver si ya existe
+		if word in sections:
+			return False
 		
 		#Modificar Indice
-		self.config.set("INDICE", "cant", str(ind+1))
+		self.config.set("INDICE", "cant", str(ind + 1))
 		self.config.add_section(word)  #adicionamos palabra
 		cont = 0
-		nuw = len(args)
-		#self.config.set(word,"cantidad",nuw)
-		if str(type(args))=="<type 'list'>":
-			for i in args:	#para cada significado haga
-				i=self.del_sp(i)
+
+		if isinstance(args, list):
+			for i in args:	 #para cada significado haga
+				i = self.del_sp(i)
 				if i != "":
-					self.config.set(word,"word"+str(cont),str(i))
-					cont+=1
+					self.config.set(word, 'word'.format(cont), str(i))
+					cont += 1
 		else:
-			i=self.del_sp(args)
-			self.config.set(word,"word0",str(i))
-		with open("dicc.cfg", "w") as f:
+			i = self.del_sp(args)
+			self.config.set(word, "word0", str(i))
+		with open(self._filename, "w") as f:
 			self.config.write(f)
 		return True
-	def read(self,num):
+
+	def read(self, num):
 		sections = self.config.sections()
-		ind = len(sections)
 		list1 = [sections[num]]
 
 		for item in self.config.items(sections[num]):
 			list1.append(item[1])
 
 		return list1
+
 	def numdicc(self):
 		ind = self.config.getint("INDICE", "cant")
 		self.sections = self.config.sections() 
 		#ind = self.config.getint(self.sections[1], "word0")
 		#print sind 
-		return len(self.sections)-1
+		return len(self.sections) - 1
 
-#funcion de menu versión
+
+#  funcion de menu versión
 def ver():
 	tkMessageBox.showinfo(title="Versión 1.2", message="Play Words \nDeveloped by: Edwin Cubillos  -> github.com/Cubillosxy \n Made in Monterrey,Colombia ")
-	
-#función de menú instruciones
+
+
+#  función de menú instruciones
 def instru():
 	tkMessageBox.showinfo(title="Instrucciones", message="-Escribe el significado de la palabra y presiona enter para validar \n-Para agregar nuevas palabras , ingresa la palabra y sus significados después da clic en guardar \n - ")
-	
+
+
 def reset_all():
 	global lis_dif
 	global lis_ind_d
@@ -143,13 +164,14 @@ def reset_all():
 
 	tkMessageBox.showinfo(title="Vuelve a iniciar :)", message=" Los valores han sido reseteados  ")
 
-def num_NoRepe(max1,lis):
-	num=random.randint(1,max1)
-	tam=len (lis)
-	loop=True
+
+def num_NoRepe(max1, lis):
+	num = random.randint(1, max1)
+	tam = len(lis)
+	loop = True
 	if tam > 0:
 		dog = 0
-		while loop :
+		while loop:
 			dog += 1
 			if dog == max1:
 				loop = False		#para evitar bucle infinito cuando se completen todas las palabras
@@ -158,34 +180,21 @@ def num_NoRepe(max1,lis):
 					loop = False
 					if int(i) == num:
 						loop = True
-						num = random.randint(1,max1)
+						num = random.randint(1, max1)
 						break #break for loop
-
-		# for i in lis:
-		# 	if(int(i)==num):
-		# 		#print "repetido", str(num),i 
-		# 		print "repetido N1", str(num)
-		# 		for h in range (1,max1):
-		# 			if (h==):
-
-
-		# 		num=random.randint(1,max1)
-		# 		for j in lis:
-		# 			if (int(j)==num):
-		# 				num=random.randint(1,max1)
-		# 				print "repetido N2", str(num)
-		# 				for p1 in lis:
-		# 					if (int(p1)==num):
-		# 						num=random.randint(1,max1)
-		# 						print "repetido N3", str(num)
-		# 						return num
-		# 				return num
-				
-		# 		return num
 
 	return num 
 
+
 def cal_pro(b_n, m_n, limit, rep):
+	"""
+
+	:param b_n: palabras correctas
+	:param m_n:
+	:param limit:
+	:param rep: lista de palabras repetidas
+	:return:
+	"""
 	res = 15
 
 	if m_n >= b_n:
@@ -194,8 +203,7 @@ def cal_pro(b_n, m_n, limit, rep):
 		v1 = b_n - m_n + 1 - rep
 		res = v1*100/limit
 
-
-	res= 125 - res
+	res = 125 - res
 	if res < 1:
 		res = 1
 	return res
@@ -203,6 +211,9 @@ def cal_pro(b_n, m_n, limit, rep):
 
 def pra(dicc, resp, n_actual):
 	"""
+		dicc: clase con dicc
+		resp: user answer
+		n_actual: index in dicc
 		Funcion para practicar, recive la respuesta, y la palabr actual
 	"""
 	global eng_play
@@ -213,11 +224,9 @@ def pra(dicc, resp, n_actual):
 	global cont_var
 	global lis_rep
 	global esp_res
-	num_w = dicc.numdicc()
+	num_w = dicc.numdicc()  # must be > 1 for avoid errors
 	bol = comp_num(resp)
-	#print "bol",bol
 	_result = False
-
 	cont_var = 1 + cont_var
 
 	#calculo de probailidad
@@ -228,18 +237,18 @@ def pra(dicc, resp, n_actual):
 		cont_var = 0
 		print("Reset conntado")
 
-	if resp != "" and bol:
+	if resp and bol:
 		resp = dicc.del_sp(resp) #elimminamos espacio
 		resp = separar(resp)    # si hay comas separamos en vector
 		_word = dicc.read(n_actual)
-		_result = comp_cade(_word,resp)
+		_result = comp_cade(_word, resp)
 
-		print(word, "w actul")
+		print(_word, "w actul")
 		print("numero inte ", cont_var)
 
 		_agg = True
 		#print resp, "usuario"
-		if result:
+		if _result:
 			#tkMessageBox.showinfo(title="Correcto!!",message="Muy bien, sigue practicando las  "+str(num_w)+ "  Palabras")
 
 			#guardamos lo que van bien para que no salgan
@@ -248,61 +257,62 @@ def pra(dicc, resp, n_actual):
 			if num_w > 1:
 				l_lisdi = len(lis_dif)
 				if l_lisdi > 0:
-					selec = random.randint(1,100) # porcentaje de veces que saldra la lista de errores
+					selec = random.randint(1, 100) # porcentaje de veces que saldra la lista de errores
 					if selec > prob:
 						print(selec, "no azar")
-						ind_noazar = random.randint(0,(l_lisdi-1))
+						ind_noazar = random.randint(0, (l_lisdi-1))
 						num_a = int(lis_ind_d[ind_noazar])
 						lis_rep.append("1")
 					else:
-						num_a = num_NoRepe(num_w,lis_bien)
+						num_a = num_NoRepe(num_w, lis_bien)
 						cont_var -= 1
 				else:
-					num_a = num_NoRepe(num_w,lis_bien)
+					num_a = num_NoRepe(num_w, lis_bien)
 					cont_var -= 1
 					
-				word = dicc.read(num_a)           #leemos lista en el dicc
+				word = dicc.read(num_a)   # leemos lista en el dicc
 				eng_play.set(word[0].upper())
 			else:
 				eng_play.set("No hay palabras")
 		else:
-			tkMessageBox.showinfo(title="Incorrecto :(", message="No coincide con  ningúna palabra \n  **para saltar la palabra deja en blanco la respuesta ")
+			tkMessageBox.showinfo(
+				title="Incorrecto :(",
+				message="No coincide con  ningúna palabra \n  **para saltar la palabra deja en blanco la respuesta "
+			)
 			lis_dif.append(_word[0])
 			lis_ind_d.append(str(n_actual))
 	elif num_w > 1:
-		num_a = random.randint(1,num_w)
+		num_a = random.randint(1, num_w)
 		word = dicc.read(num_a)
 		eng_play.set(word[0].upper())
 	else:
 		eng_play.set("No hay palabras")
 
-def comp_cade(_word,resp):
 
-	for i in range (1,len(_word)):
+def comp_cade(_word, resp):
+	for i in range(1, len(_word)):
 		if isinstance(resp, list):
 			for j in resp:
-				if j ==_word[i]:
+				if j == _word[i]:
 					return True
-		elif resp ==_word[i]:
+		elif resp == _word[i]:
 			return True
 	return False
 
+
 def comp_num(word):
-	#retorna verdadero si no contiene numeros
-	h = "1234567890"
-	for i in h:
-		for j in word:
-			if j == i:
-				return False
-	return True
+	#  retorna verdadero si no contiene numeros
+	return not bool(re.search(r'\d', word))
+
 
 def separar(word):
-	##separa las palabras si contiene coma
+	#  separa las palabras si contiene coma
 	res = word
 	esp = word.find(",")
-	if esp >= 0:		#si contiene mas de un elemento
+	if esp >= 0:		# si contiene mas de un elemento
 		res = word.split(",")
 	return res
+
 
 def w_write(dicc, eng, spa):
 	"""
@@ -311,8 +321,7 @@ def w_write(dicc, eng, spa):
 	bol = comp_num(eng)
 	bol2 = comp_num(spa)
 
-	
-	if eng != "" and spa != "" and bol and bol2:
+	if eng and spa and bol and bol2:
 
 		spa = separar(spa)
 		eng = separar(eng)
@@ -324,32 +333,29 @@ def w_write(dicc, eng, spa):
 			eng = eng[0]
 
 		write_word = dicc.write(eng, spa)
-
-		#para evitar error en tkms
-		if isinstance(spa, list):
-			spa = spa[0]
 		
 		if write_word:
-			tkMessageBox.showinfo(title="Echo", message="Se agrego correctamente \n   " + eng)
+			tkMessageBox.showinfo(title='Echo', message='Se agrego correctamente \n   {}'.format(eng))
 		else:
-			tkMessageBox.showinfo(title="Error", message="La palabra ya existe en el diccionario \n   " + eng)
+			tkMessageBox.showinfo(title='Error', message='La palabra ya existe en el diccionario \n   {}'.format(eng))
 
-	else : 
-		tkMessageBox.showinfo(title="Error",message="No puedes ingresar valores vacios ni números \n      "+eng +"\n     "+spa)
-
+	else:
+		tkMessageBox.showinfo(
+			title='Error',
+			message='No puedes ingresar valores vacios ni números \n      {}\n     {}'.format(eng, spa)
+		)
 
 
 ##captura de teclas
 def key(event):
 
 	cap = (repr(event.char))
-   	if cap == repr('\r'):
-   		#print "enter"
-   		pra(mygame, esp_res.get(), num_a)
-   	elif cap == repr('0'):
-   		reset_all()
-   		pass
-#
+	if cap == repr('\r'):
+		pra(mygame, esp_res.get(), num_a)
+	elif cap == repr('0'):
+		reset_all()
+
+
 def main():
 
 	#interfaz
@@ -361,11 +367,10 @@ def main():
 	#raiz.configure(background='white')
 
 	h_pc = raiz.winfo_screenheight()
-  	w_pc = raiz.winfo_screenwidth()
-  	raiz.geometry("+%d+%d" % ((w_pc/2-width/2),(h_pc/2-higth/2-20))) 
+	w_pc = raiz.winfo_screenwidth()
+	raiz.geometry("+%d+%d" % ((w_pc/2-width/2), (h_pc/2-higth/2-20)))
 
-
-	f1 = Frame(raiz)		#contenedores
+	f1 = Frame(raiz)		# contenedores
 	f2 = Frame(raiz)
 
 	#variables 
@@ -406,16 +411,14 @@ def main():
 	
 	mnuFile = Menu(barraMenu)
 	mnuHelp = Menu(barraMenu)
-	mnuFile.add_command(label='Reset',command=reset_all)
-	mnuFile.add_command(label='Exit',command=raiz.destroy)
-	
+	mnuFile.add_command(label='Reset', command=reset_all)
+	mnuFile.add_command(label='Exit', command=raiz.destroy)
 
-	mnuHelp.add_command(label='Instruciones', command= instru)
-	mnuHelp.add_command(label='Versión', command= ver)
+	mnuHelp.add_command(label='Instruciones', command=instru)
+	mnuHelp.add_command(label='Versión', command=ver)
 
-
-	barraMenu.add_cascade(label="File",menu=mnuFile)
-	barraMenu.add_cascade(label="Help",menu=mnuHelp)
+	barraMenu.add_cascade(label="File", menu=mnuFile)
+	barraMenu.add_cascade(label="Help", menu=mnuHelp)
 
 	raiz.config(menu=barraMenu)
 
@@ -424,37 +427,40 @@ def main():
 	b2 = PhotoImage(file='biblio/pra.ppm')
 
 	#botones
-	bot_add = Button(f1,image=b1,command=lambda:w_write(mygame,eng_add.get(),esp_add.get()))
-	bot_practice = Button(f2,image=b2,command=lambda:pra(mygame,esp_res.get(),num_a))
+	bot_add = Button(f1, image=b1, command=lambda: w_write(mygame, eng_add.get(), esp_add.get()))
+	bot_practice = Button(f2, image=b2, command=lambda: pra(mygame, esp_res.get(), num_a))
 
 	#
 
 	#labels
-	l_en1 = Label(f1,text="ENGLISH :",anchor="n",padx=2 )
-	txt_en1 = Entry(f1, textvariable=eng_add , width=15)
-	l_sp1=Label(f1,text="ESPAÑOL :",anchor="n",padx=2 )
+	l_en1 = Label(f1, text="ENGLISH :", anchor="n", padx=2)
+	txt_en1 = Entry(f1, textvariable=eng_add, width=15)
+	l_sp1 = Label(f1, text="ESPAÑOL :", anchor="n", padx=2)
 	txt_es1 = Entry(f1, textvariable=esp_add, width=15)
 
 	separ3 = ttk.Separator(f1, orient=HORIZONTAL)
-	l_inf1 = Label(f1,text="Separa las palabras por (,)",anchor="n",padx=2 )
+	l_inf1 = Label(f1,text="Separa las palabras por (,)", anchor="n", padx=2)
 	separ4 = ttk.Separator(f1, orient=HORIZONTAL)
 
-
-
-	l_sp2 = Label(f2,text="Escribe el Significado de: ",anchor="n",padx=2 )
-	l_eng2 = Label(f2, textvariable=eng_play ,
-                               foreground="black", background="white",
-                               borderwidth=5, anchor="n",width=10) 
-	l_inf2 = Label(f2,text="Español",anchor="n",padx=2 )
+	#
+	l_sp2 = Label(f2, text="Escribe el Significado de: ", anchor="n", padx=2)
+	l_eng2 = Label(
+		f2,
+		textvariable=eng_play,
+		foreground="black",
+		background="white",
+		borderwidth=5,
+		anchor="n",
+		width=10
+	)
+	l_inf2 = Label(f2, text="Español", anchor="n", padx=2)
 	separ1 = ttk.Separator(f2, orient=HORIZONTAL)
-	l_sp3 = Label(f2,text="Separa las palabras por (,): ",anchor="n",padx=2 )
+	l_sp3 = Label(f2, text="Separa las palabras por (,): ", anchor="n", padx=2)
 	separ2 = ttk.Separator(f2, orient=HORIZONTAL)
 	txt_res1 = Entry(f2, textvariable=esp_res, width=15) 
 
-
-
-	#pack 
-	bot_add.pack(side=TOP )
+	#  pack
+	bot_add.pack(side=TOP)
 
 	l_en1.pack(side=TOP, fill=BOTH, expand=True, padx=1, pady=1)
 	txt_en1.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=5)
@@ -473,29 +479,27 @@ def main():
 	txt_res1.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
 	separ2.pack(side=BOTTOM, fill=BOTH, expand=True, padx=10, pady=5)
 
-	#frame- place 
+	#  frame- place
 	f2.pack(side=TOP)
 
 	separF = ttk.Separator(raiz, orient=HORIZONTAL)
 	separF.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
 	f1.pack(side=TOP)
-	
 
-	##COPYRIGHT
-	text1 = "COPYRIGHT (c) EDWIN CUBILLOS 2016 "
+	#  COPYRIGHT
+	text1 = 'COPYRIGHT (c) EDWIN CUBILLOS 2016 '
 
-	l_copyright = Label(raiz,text=text1,anchor="n",padx=2 )
-	##print len(text1)
+	l_copyright = Label(raiz, text=text1, anchor='n', padx=2)
 	l_copyright.pack(side=BOTTOM)
 
 	raiz.mainloop()
 
-	stri = ""
 	if len(lis_dif) > 1:
-		
-		for i in lis_dif:
-			stri = stri+" , "+str(i)
-		tkMessageBox.showinfo(title="Bien",message="Te recomendamos practicar estas palabras \n "+stri)
+		list_diff_str = ', '.join(lis_dif)
+		tkMessageBox.showinfo(
+			title='Bien',
+			message='Te recomendamos practicar estas palabras \n {}'.format(list_diff_str)
+		)
 
 	lis_fin = []
 	for i in lis_bien:
@@ -506,23 +510,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-# mygame=dicc()
-# new="garlic"
-
-# r=mygame.write(new,"ajo")
-
-# if (r):
-# 	print "Operación terminada"
-# else:
-# 	print "Error !! puede que la palabra ya exista"
-
-# num=random.randint(1,mygame.numdicc())
-# word=mygame.read(num) 
-# mygame.numdicc()
-# print "En:",word[0], "-- Es:",word[1]
-
-
-# Removemos el ítem "votos" de la sección "TEMA2"
-#config.remove_option("TEMA2", "votos")
-# Guardamos los cambios
