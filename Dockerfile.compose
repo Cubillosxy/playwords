@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get install x11-xserver-utils -y
 RUN apt-get install python-tk -y
 RUN pip install ipython
+RUN pip install ipdb
 RUN mkdir /code
 WORKDIR /code
 #ADD . .

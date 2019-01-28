@@ -1,5 +1,4 @@
 # PlayWords
-=============
 
 ![PlayWords](https://github.com/Cubillosxy/playwords/blob/master/biblio/Playwords_v.jpg)
 
@@ -7,7 +6,7 @@
 Program for practice new words spanish/english
 ```
 
-Playwords is just a code that you can run, this use a GUI on Tkinter also use a dicctionary (file.cfg) to save the words. 
+Playwords is a desktop program, it uses a GUI on Tkinter and uses a dicctionary (file.cfg) to save the words. 
 
 Requirements:
 * Python 2.X 
@@ -36,6 +35,9 @@ docker-compose up
 # exec command in container
 docker exec -it playwords_play_1 bash
 ```
+
+## run without docker
+python playenglish.py 
 
 # Questions?
 
