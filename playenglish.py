@@ -39,7 +39,10 @@ except ImportError:
 import re
 
 
-class dicc():
+__version__ = '1.3'
+
+
+class Dicc:
 	def __init__(self):
 		# Creamos una instancia de la clase y abrimos el archivo
 		self.config = ConfigParser()
@@ -62,7 +65,8 @@ class dicc():
 			with open(self._filename, "w") as f:
 				self.config.write(f)
 
-	def remove_space(self, word):
+	@staticmethod
+	def remove_space(word):
 		word = word.replace(' ', '').lower() 
 		return word
 
@@ -75,21 +79,44 @@ class dicc():
 	
 		# Buscamos para ver si ya existe
 		if word in sections:
-			return {'title': 'Error', 'message': 'La palabra ya existe en el diccionario \n   {}'.format(word)}
-		
-		# Modificar Indice
-		self.config.set("INDICE", "cant", str(ind + 1))
-		self.config.add_section(word)  # adicionamos palabra
-		cont = 0
+			items = self.config.items(word)
+			pointer = len(items)
+			items_spanish = [i[1] for i in items]
 
-		for i in args:	 # para cada significado haga
-			i = self.remove_space(i)
-			self.config.set(word, 'word{}'.format(cont), i)
-			cont += 1
+			count_modifications = 0
+			for i in args:
+				if i not in items_spanish:
+					pointer_cfg = 'word{}'.format(pointer + count_modifications)
+					self.config.set(word, pointer_cfg, i)
+					count_modifications += 1
+
+			response = {
+				'title': 'Ok edit',
+				'message': 'The new meanings were added correctly: {}'.format(count_modifications),
+			}
+
+			if not count_modifications:
+				response = {
+					'title': 'Error',
+					'message': 'There was no modification for current word: \n   {}'.format(word),
+				}
+
+		else:
+			# Modificar Indice
+			self.config.set("INDICE", "cant", str(ind + 1))
+			self.config.add_section(word)  # adicionamos palabra
+			cont = 0
+
+			response = {'title': 'OK', 'message': 'Se agrego correctamente \n   {}'.format(word)}
+
+			for i in args:	 # para cada significado haga
+				i = self.remove_space(i)
+				self.config.set(word, 'word{}'.format(cont), i)
+				cont += 1
 
 		with open(self._filename, "w") as f:
 			self.config.write(f)
-		return {'title': 'OK', 'message': 'Se agrego correctamente \n   {}'.format(word)}
+		return response
 
 	def read(self, num):
 		sections = self.config.sections()
@@ -110,12 +137,19 @@ class dicc():
 
 #  funcion de menu versión
 def ver():
-	tkMessageBox.showinfo(title="Versión 1.2", message="Play Words \nDeveloped by: Edwin Cubillos  -> github.com/Cubillosxy \n Made in Monterrey,Colombia ")
+	tkMessageBox.showinfo(
+		title="Versión {}".format(__version__),
+		message="Play Words \nDeveloped by: Edwin Cubillos  -> github.com/Cubillosxy \n Made in Monterrey,Colombia "
+	)
 
 
 #  función de menú instruciones
 def instru():
-	tkMessageBox.showinfo(title="Instrucciones", message="-Escribe el significado de la palabra y presiona enter para validar \n-Para agregar nuevas palabras , ingresa la palabra y sus significados después da clic en guardar \n - ")
+	tkMessageBox.showinfo(
+		title="Instrucciones",
+		message="-Escribe el significado de la palabra y presiona enter para validar \n -Para agregar nuevas palabras , "
+		"ingresa la palabra y sus significados después da clic en guardar \n - "
+	)
 
 
 def reset_all():
@@ -149,14 +183,14 @@ def get_num_not_repeat(max1, list_ok):
 		while loop:
 			watchdog += 1
 			if watchdog == max1:
-				loop = False		#para evitar bucle infinito cuando se completen todas las palabras
+				loop = False		# para evitar bucle infinito cuando se completen todas las palabras
 			else:
 				for i in list_ok:
 					loop = False
 					if int(i) == num:
 						loop = True
 						num = random.randint(1, max1)
-						break #break for loop
+						break  # break for loop
 
 	return num 
 
@@ -203,7 +237,7 @@ def pra(dicc, resp, n_actual):
 	_result = False
 	cont_var = 1 + cont_var
 
-	#calculo de probailidad
+	# calculo de probailidad
 	prob = cal_pro(len(lis_bien), len(lis_ind_d), num_w, len(lis_rep))
 	print("La probailidad es ", (100-prob), " %")
 
@@ -212,7 +246,7 @@ def pra(dicc, resp, n_actual):
 		print("Reset contador")
 
 	if resp and bol:
-		resp = dicc.remove_space(resp) #elimminamos espacio
+		resp = dicc.remove_space(resp)  # elimminamos espacio
 		resp = split_result(resp)    # si hay comas separamos en vector
 		_word = dicc.read(n_actual)
 		_result = comp_cade(_word, resp)
@@ -221,17 +255,15 @@ def pra(dicc, resp, n_actual):
 		print("numero inte ", cont_var)
 
 		_agg = True
-		#print resp, "usuario"
 		if _result:
-			#tkMessageBox.showinfo(title="Correcto!!",message="Muy bien, sigue practicando las  "+str(num_w)+ "  Palabras")
 
-			#guardamos lo que van bien para que no salgan
+			# guardamos lo que van bien para que no salgan
 			lis_bien.append(str(n_actual))
 			esp_res.set("")
 			if num_w > 1:
 				l_lisdi = len(lis_dif)
 				if l_lisdi > 0:
-					selec = random.randint(1, 100) # porcentaje de veces que saldra la lista de errores
+					selec = random.randint(1, 100)  # porcentaje de veces que saldra la lista de errores
 					if selec > prob:
 						print(selec, "no azar")
 						ind_noazar = random.randint(0, (l_lisdi-1))
@@ -279,7 +311,7 @@ def search_num(word):
 
 
 def split_result(word):
-	return filter(None, word.split(","))
+	return list(set(filter(None, word.split(","))))
 
 
 def w_write(dicc_class, eng, spa):
@@ -317,13 +349,13 @@ def key(event):
 
 def main():
 
-	#interfaz
+	# interfaz
 	raiz = Tk()
-	raiz.title("LEARN WORDS  V1.1")
+	raiz.title("LEARN WORDS  V{}".format(__version__))
 	width = 240
 	higth = 460
 	raiz.geometry(str(width)+"x"+str(higth))
-	#raiz.configure(background='white')
+	# raiz.configure(background='white')
 
 	h_pc = raiz.winfo_screenheight()
 	w_pc = raiz.winfo_screenwidth()
@@ -332,7 +364,7 @@ def main():
 	f1 = Frame(raiz)		# contenedores
 	f2 = Frame(raiz)
 
-	#variables 
+	# variables
 	global esp_res
 	eng_add = StringVar(value='')
 	esp_add = StringVar(value='')
@@ -350,9 +382,9 @@ def main():
 	lis_rep = []
 	cont_var = 0
 
-	##llamados a clases
+	# llamados a clases
 	global mygame
-	mygame = dicc()
+	mygame = Dicc()
 	num_w = mygame.numdicc()
 
 	global num_a
@@ -364,7 +396,7 @@ def main():
 	else:
 		eng_play.set("No hay palabras")
 
-	##MENU BAR
+	# MENU BAR
 
 	barraMenu = Menu(raiz)
 	
@@ -430,7 +462,7 @@ def main():
 	separ4.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
 
 	bot_practice.pack(side=TOP)
-	raiz.bind('<KeyPress>', key) #'<KeyPress>
+	raiz.bind('<KeyPress>', key)  # '<KeyPress>
 	l_sp2.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
 	l_eng2.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
 	separ1.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
@@ -462,8 +494,8 @@ def main():
 
 	lis_fin = []
 	for i in lis_bien:
-		lis_fin.append(int(i)) #pasar la lista a entera
-	lis_fin = sorted(lis_fin)   #ordenar la lista
+		lis_fin.append(int(i))  # pasar la lista a entera
+	lis_fin = sorted(lis_fin)   # ordenar la lista
 	print("bien :", lis_fin)
 
 
