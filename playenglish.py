@@ -50,26 +50,6 @@ class dicc():
 
 		val = len(sections)
 
-		#edición
-		#self.config.set("stuck", "word2","estancado")
-		#self.config.set("piping", "word0","tubería")
-
-		##eliminación manual
-		#self.config.remove_section("square")
-		#self.config.remove_section("heaven")
-		#self.config.remove_section("dry")
-		#self.config.remove_section("fade")
-		#self.config.remove_section("guest")
-		#self.config.remove_section("allow")
-		#self.config.remove_section("slay")
-		#self.config.remove_section("jaggued")
-		#self.config.remove_section("lonesome")
-		#self.config.remove_section("award")  #q05
-		#self.config.remove_section("sausage")
-		#self.config.remove_option("bowl", "word0")
-
-		#self.config.set("abash", "word2","avergonzado")
-		#print "numero de secc ",val
 		try:
 			self.config.getint("INDICE", "cant")
 			self.config.set("INDICE", "cant", str(val-1))
@@ -77,64 +57,54 @@ class dicc():
 				self.config.write(f)
 		except Exception as e:
 			print(repr(e))
-			self.config.add_section("INDICE")  #adicyaionamos palabra
+			self.config.add_section("INDICE")   # add word
 			self.config.set("INDICE", "cant", "0")
 			with open(self._filename, "w") as f:
 				self.config.write(f)
 
-	def del_sp(self, word):
-		esp = word.find(" ")
-		if esp >= 0:		#si contiene algún espacio se elimina el espacio
-			res = word.split(" ")
-			word = ""
-			for i in res:
-				word = word + str(i)	#une todos los elementos de la lista, conviertiendolos en una cadena
-		word = word.lower()  # convertir a minuscula todo
+	def remove_space(self, word):
+		word = word.replace(' ', '').lower() 
 		return word
 
-		#recive la palabra y sus significados
 	def write(self, word, args):
+
 		ind = self.config.getint("INDICE", "cant")
 		sections = self.config.sections() 
 
-		word = self.del_sp(word)  #llamamos
+		word = self.remove_space(word)  # llamamos
 	
-		#Buscamos para ver si ya existe
+		# Buscamos para ver si ya existe
 		if word in sections:
-			return False
+			return {'title': 'Error', 'message': 'La palabra ya existe en el diccionario \n   {}'.format(word)}
 		
-		#Modificar Indice
+		# Modificar Indice
 		self.config.set("INDICE", "cant", str(ind + 1))
-		self.config.add_section(word)  #adicionamos palabra
+		self.config.add_section(word)  # adicionamos palabra
 		cont = 0
 
-		if isinstance(args, list):
-			for i in args:	 #para cada significado haga
-				i = self.del_sp(i)
-				if i != "":
-					self.config.set(word, 'word'.format(cont), str(i))
-					cont += 1
-		else:
-			i = self.del_sp(args)
-			self.config.set(word, "word0", str(i))
+		for i in args:	 # para cada significado haga
+			i = self.remove_space(i)
+			self.config.set(word, 'word{}'.format(cont), i)
+			cont += 1
+
 		with open(self._filename, "w") as f:
 			self.config.write(f)
-		return True
+		return {'title': 'OK', 'message': 'Se agrego correctamente \n   {}'.format(word)}
 
 	def read(self, num):
 		sections = self.config.sections()
-		list1 = [sections[num]]
+		word_in_dicc = sections[num]
+		list1 = [word_in_dicc]
 
-		for item in self.config.items(sections[num]):
+		for item in self.config.items(word_in_dicc):
+			# read text (word0, 'myword')
 			list1.append(item[1])
 
 		return list1
 
 	def numdicc(self):
 		ind = self.config.getint("INDICE", "cant")
-		self.sections = self.config.sections() 
-		#ind = self.config.getint(self.sections[1], "word0")
-		#print sind 
+		self.sections = self.config.sections()
 		return len(self.sections) - 1
 
 
@@ -165,18 +135,23 @@ def reset_all():
 	tkMessageBox.showinfo(title="Vuelve a iniciar :)", message=" Los valores han sido reseteados  ")
 
 
-def num_NoRepe(max1, lis):
+def get_num_not_repeat(max1, list_ok):
+	"""
+	:param max1:  limit of iterations
+	:param list_ok: array for check not repeat
+	:return: random num that not exist in array
+	"""
 	num = random.randint(1, max1)
-	tam = len(lis)
+	size = len(list_ok)
 	loop = True
-	if tam > 0:
-		dog = 0
+	if size:
+		watchdog = 0
 		while loop:
-			dog += 1
-			if dog == max1:
+			watchdog += 1
+			if watchdog == max1:
 				loop = False		#para evitar bucle infinito cuando se completen todas las palabras
 			else:
-				for i in lis:
+				for i in list_ok:
 					loop = False
 					if int(i) == num:
 						loop = True
@@ -188,7 +163,6 @@ def num_NoRepe(max1, lis):
 
 def cal_pro(b_n, m_n, limit, rep):
 	"""
-
 	:param b_n: palabras correctas
 	:param m_n:
 	:param limit:
@@ -201,7 +175,7 @@ def cal_pro(b_n, m_n, limit, rep):
 		res = 40
 	else:
 		v1 = b_n - m_n + 1 - rep
-		res = v1*100/limit
+		res = v1 * 100 / limit
 
 	res = 125 - res
 	if res < 1:
@@ -225,7 +199,7 @@ def pra(dicc, resp, n_actual):
 	global lis_rep
 	global esp_res
 	num_w = dicc.numdicc()  # must be > 1 for avoid errors
-	bol = comp_num(resp)
+	bol = search_num(resp)
 	_result = False
 	cont_var = 1 + cont_var
 
@@ -235,15 +209,15 @@ def pra(dicc, resp, n_actual):
 
 	if cont_var > 40:
 		cont_var = 0
-		print("Reset conntado")
+		print("Reset contador")
 
 	if resp and bol:
-		resp = dicc.del_sp(resp) #elimminamos espacio
-		resp = separar(resp)    # si hay comas separamos en vector
+		resp = dicc.remove_space(resp) #elimminamos espacio
+		resp = split_result(resp)    # si hay comas separamos en vector
 		_word = dicc.read(n_actual)
 		_result = comp_cade(_word, resp)
 
-		print(_word, "w actul")
+		print(_word, " w actul")
 		print("numero inte ", cont_var)
 
 		_agg = True
@@ -264,10 +238,10 @@ def pra(dicc, resp, n_actual):
 						num_a = int(lis_ind_d[ind_noazar])
 						lis_rep.append("1")
 					else:
-						num_a = num_NoRepe(num_w, lis_bien)
+						num_a = get_num_not_repeat(num_w, lis_bien)
 						cont_var -= 1
 				else:
-					num_a = num_NoRepe(num_w, lis_bien)
+					num_a = get_num_not_repeat(num_w, lis_bien)
 					cont_var -= 1
 					
 				word = dicc.read(num_a)   # leemos lista en el dicc
@@ -292,52 +266,37 @@ def pra(dicc, resp, n_actual):
 def comp_cade(_word, resp):
 	for i in range(1, len(_word)):
 		if isinstance(resp, list):
-			for j in resp:
-				if j == _word[i]:
-					return True
+			if _word[i] in resp:
+				return True
 		elif resp == _word[i]:
 			return True
 	return False
 
 
-def comp_num(word):
+def search_num(word):
 	#  retorna verdadero si no contiene numeros
 	return not bool(re.search(r'\d', word))
 
 
-def separar(word):
-	#  separa las palabras si contiene coma
-	res = word
-	esp = word.find(",")
-	if esp >= 0:		# si contiene mas de un elemento
-		res = word.split(",")
-	return res
+def split_result(word):
+	return filter(None, word.split(","))
 
 
-def w_write(dicc, eng, spa):
+def w_write(dicc_class, eng, spa):
 	"""
 	Escribe en archivo
 	"""
-	bol = comp_num(eng)
-	bol2 = comp_num(spa)
+	bol = search_num(eng)
+	bol2 = search_num(spa)
 
 	if eng and spa and bol and bol2:
 
-		spa = separar(spa)
-		eng = separar(eng)
+		spa = split_result(spa)
+		eng = split_result(eng)
 		
-		if isinstance(eng, list):
-			# for i in eng:
-			# 	ww=dicc.write(i,spa)
-			
-			eng = eng[0]
-
-		write_word = dicc.write(eng, spa)
-		
-		if write_word:
-			tkMessageBox.showinfo(title='Echo', message='Se agrego correctamente \n   {}'.format(eng))
-		else:
-			tkMessageBox.showinfo(title='Error', message='La palabra ya existe en el diccionario \n   {}'.format(eng))
+		for word_eng in eng:
+			write_word_result = dicc_class.write(word_eng, spa)
+			tkMessageBox.showinfo(**write_word_result)
 
 	else:
 		tkMessageBox.showinfo(
@@ -346,7 +305,7 @@ def w_write(dicc, eng, spa):
 		)
 
 
-##captura de teclas
+# captura de teclas
 def key(event):
 
 	cap = (repr(event.char))
