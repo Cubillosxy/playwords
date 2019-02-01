@@ -2,9 +2,9 @@
 
 ![PlayWords](https://github.com/Cubillosxy/playwords/blob/master/biblio/Playwords_v.jpg)
 
-```
-Program for practice new words spanish/english
-```
+
+**Program for practice new words spanish/english**
+
 
 Playwords is a desktop program, it uses a GUI on Tkinter and uses a dicctionary (file.cfg) to save the words. 
 
@@ -12,14 +12,14 @@ Requirements:
 * Python 2.X 
 * Tkinter 
 
-- load sample dicc (optional)
+##### Load sample dicc (optional)
 ```
 cp biblio/dicc\ 2.cfg dicc.cfg
 ```
 
 ### Docker
 
-linux system
+- Linux 
 
 ```
 apt-get install x11-xserver-utils
@@ -36,9 +36,10 @@ docker-compose up
 docker exec -it playwords_play_1 bash
 ```
 
-## run without docker
-python playenglish.py 
+### Run without docker
+`python playenglish.py`
 
-# Questions?
+----
 
-Edwin Cubillos Bohorquez, Colombia : [edwin.cubillos@uptc.edu.co]
+<p align="center">This project is licensed under the  <a href='https://opensource.org/licenses/MIT' target="_blank">MIT License</a>.</br>
+Copyright &copy; 2016 Edwin Cubillos</p>
