@@ -34,7 +34,7 @@ try: #Python 2.x
 except ImportError:
 	# Python 3
 	from configparser import ConfigParser
-	import Random
+	import random
 
 import re
 
