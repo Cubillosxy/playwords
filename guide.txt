@@ -3,4 +3,4 @@ echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongod
  sudo apt-get update
 sudo apt-get install libcurl3 openssl
 sudo apt-get install -y mongodb-org
-
+mongoimport --db dbName --collection collectionName --file fileName.json --jsonArray
