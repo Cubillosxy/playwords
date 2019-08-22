@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
-#Importamos Librerias 
-
 
 """
 
--add midificar eliminar
+-add modify/erase
 
 """
-try: #Python 2.x
-	try:
-		from ConfigParser import ConfigParser
-	except ImportError:
-		from configparser import ConfigParser
+try:
+	#Python 2.x
+	from ConfigParser import ConfigParser
 	import random
 	from Tkinter import Tk
 	from Tkinter import Frame
@@ -27,11 +23,14 @@ try: #Python 2.x
 	from Tkinter import BOTTOM
 	import ttk
 	import tkMessageBox
+	from tkSimpleDialog import askstring
 	import sys
 	reload(sys)
 	sys.setdefaultencoding('utf-8')
 
 except ImportError:
+	from tkinter import Tk
+	from tkinter.simpledialog import askstring
 	# Python 3
 	from configparser import ConfigParser
 	import random
@@ -39,12 +38,12 @@ except ImportError:
 import re
 
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 
 class Dicc:
 	def __init__(self):
-		# Creamos una instancia de la clase y abrimos el archivo
+		# Instace ConfigParser and set filename
 		self.config = ConfigParser()
 		self._filename = 'dicc.cfg'
 		self.sections = None
@@ -56,14 +55,19 @@ class Dicc:
 		try:
 			self.config.getint("INDICE", "cant")
 			self.config.set("INDICE", "cant", str(val-1))
+			# pass content to config instance
 			with open(self._filename, "w") as f:
 				self.config.write(f)
 		except Exception as e:
+			# error reading dicc.cfg
 			print(repr(e))
 			self.config.add_section("INDICE")   # add word
 			self.config.set("INDICE", "cant", "0")
 			with open(self._filename, "w") as f:
 				self.config.write(f)
+
+	def remove_section(self, word):
+		return self.config.remove_section(word)
 
 	@staticmethod
 	def remove_space(word):
@@ -71,13 +75,18 @@ class Dicc:
 		return word
 
 	def write(self, word, args):
+		"""
+		:param word: current word for be write
+		:param args: meanings
+		:return: dict with result
+		"""
 
 		ind = self.config.getint("INDICE", "cant")
 		sections = self.config.sections() 
 
-		word = self.remove_space(word)  # llamamos
+		word = self.remove_space(word)
 	
-		# Buscamos para ver si ya existe
+		# Match word in current dicc
 		if word in sections:
 			items = self.config.items(word)
 			pointer = len(items)
@@ -85,6 +94,7 @@ class Dicc:
 
 			count_modifications = 0
 			for i in args:
+				# if new meaning is not register
 				if i not in items_spanish:
 					pointer_cfg = 'word{}'.format(pointer + count_modifications)
 					self.config.set(word, pointer_cfg, i)
@@ -102,17 +112,15 @@ class Dicc:
 				}
 
 		else:
-			# Modificar Indice
+			# increment Index
 			self.config.set("INDICE", "cant", str(ind + 1))
 			self.config.add_section(word)  # adicionamos palabra
-			cont = 0
 
 			response = {'title': 'OK', 'message': 'Se agrego correctamente \n   {}'.format(word)}
 
-			for i in args:	 # para cada significado haga
+			for count, i in enumerate(args):
 				i = self.remove_space(i)
-				self.config.set(word, 'word{}'.format(cont), i)
-				cont += 1
+				self.config.set(word, 'word{}'.format(count), i)
 
 		with open(self._filename, "w") as f:
 			self.config.write(f)
@@ -129,7 +137,7 @@ class Dicc:
 
 		return list1
 
-	def numdicc(self):
+	def num_dicc(self):
 		ind = self.config.getint("INDICE", "cant")
 		self.sections = self.config.sections()
 		return len(self.sections) - 1
@@ -144,7 +152,7 @@ def ver():
 
 
 #  función de menú instruciones
-def instru():
+def instructions():
 	tkMessageBox.showinfo(
 		title="Instrucciones",
 		message="-Escribe el significado de la palabra y presiona enter para validar \n -Para agregar nuevas palabras , "
@@ -169,6 +177,24 @@ def reset_all():
 	tkMessageBox.showinfo(title="Vuelve a iniciar :)", message=" Los valores han sido reseteados  ")
 
 
+def delete_word():
+	result = askstring('Delete word and meanings ', 'Word')
+
+	if result:
+		remove_action = mygame.remove_section(result.lower())
+		if remove_action:
+			mygame.remove_section(result)
+			tkMessageBox.showinfo(
+				title='Deleted',
+				message='The above word was eliminated \n {}'.format(result)
+			)
+		else:
+			tkMessageBox.showinfo(
+				title='Error',
+				message='The word that you typed does not exist in dicc \n {}'.format(result)
+			)
+
+
 def get_num_not_repeat(max1, list_ok):
 	"""
 	:param max1:  limit of iterations
@@ -184,36 +210,32 @@ def get_num_not_repeat(max1, list_ok):
 			watchdog += 1
 			if watchdog == max1:
 				loop = False		# para evitar bucle infinito cuando se completen todas las palabras
+			elif str(num) in list_ok:
+				num = random.randint(1, max1)
 			else:
-				for i in list_ok:
-					loop = False
-					if int(i) == num:
-						loop = True
-						num = random.randint(1, max1)
-						break  # break for loop
-
+				loop = False
 	return num 
 
 
 def cal_pro(b_n, m_n, limit, rep):
 	"""
 	:param b_n: palabras correctas
-	:param m_n:
-	:param limit:
-	:param rep: lista de palabras repetidas
+	:param m_n: wrong words - index len
+	:param limit: total words in dicc.cfg
+	:param rep: list with 1, times with the auto probability won
 	:return:
 	"""
-	res = 15
 
 	if m_n >= b_n:
+		# fixed prob if correct word are >= that wrong count
 		res = 40
 	else:
 		v1 = b_n - m_n + 1 - rep
 		res = v1 * 100 / limit
+		if res < 1:
+			res = 1
 
 	res = 125 - res
-	if res < 1:
-		res = 1
 	return res
 
 
@@ -226,26 +248,28 @@ def pra(dicc, resp, n_actual):
 	"""
 	global eng_play
 	global num_a
-	global lis_dif
-	global lis_ind_d
+	global lis_dif  # list of wrong words
+	global lis_ind_d  # index of wrong words
 	global lis_bien
 	global cont_var
 	global lis_rep
 	global esp_res
-	num_w = dicc.numdicc()  # must be > 1 for avoid errors
-	bol = search_num(resp)
+	num_w = dicc.num_dicc()  # must be > 1 for avoid errors
+	is_not_number = search_num(resp)
 	_result = False
-	cont_var = 1 + cont_var
+	# attempts
+	cont_var += cont_var
 
-	# calculo de probailidad
-	prob = cal_pro(len(lis_bien), len(lis_ind_d), num_w, len(lis_rep))
-	print("La probailidad es ", (100-prob), " %")
+	# calc prob of wrong words
+	# this probability raise with each wrong typed answer
+	prob_wrong = cal_pro(len(lis_bien), len(lis_ind_d), num_w, len(lis_rep))
+	print("La probailidad es ", (100-prob_wrong), " %")
 
 	if cont_var > 40:
 		cont_var = 0
 		print("Reset contador")
 
-	if resp and bol:
+	if resp and is_not_number:
 		resp = dicc.remove_space(resp)  # elimminamos espacio
 		resp = split_result(resp)    # si hay comas separamos en vector
 		_word = dicc.read(n_actual)
@@ -261,11 +285,12 @@ def pra(dicc, resp, n_actual):
 			lis_bien.append(str(n_actual))
 			esp_res.set("")
 			if num_w > 1:
+				# list of wrong index words
 				l_lisdi = len(lis_dif)
 				if l_lisdi > 0:
-					selec = random.randint(1, 100)  # porcentaje de veces que saldra la lista de errores
-					if selec > prob:
-						print(selec, "no azar")
+					random_probability = random.randint(1, 100)  # porcentaje de veces que saldra la lista de errores
+					if random_probability > prob_wrong:
+						print(random_probability, ' no azar - prob :{}'.format(prob_wrong))
 						ind_noazar = random.randint(0, (l_lisdi-1))
 						num_a = int(lis_ind_d[ind_noazar])
 						lis_rep.append("1")
@@ -291,6 +316,7 @@ def pra(dicc, resp, n_actual):
 			lis_dif.append(_word[0])
 			lis_ind_d.append(str(n_actual))
 	elif num_w > 1:
+		# jump
 		num_a = random.randint(1, num_w)
 		word = dicc.read(num_a)
 		eng_play.set(word[0].upper())
@@ -309,7 +335,10 @@ def comp_cade(_word, resp):
 
 
 def search_num(word):
-	#  retorna verdadero si no contiene numeros
+	"""
+	:param word:
+	:return: True if not content numbers
+	"""
 	return not bool(re.search(r'\d', word))
 
 
@@ -388,7 +417,7 @@ def main():
 	# llamados a clases
 	global mygame
 	mygame = Dicc()
-	num_w = mygame.numdicc()
+	num_w = mygame.num_dicc()
 
 	global num_a
 	num_a = 0
@@ -405,10 +434,11 @@ def main():
 	
 	mnuFile = Menu(barraMenu)
 	mnuHelp = Menu(barraMenu)
+	mnuFile.add_command(label='Delete word', command=delete_word)
 	mnuFile.add_command(label='Reset', command=reset_all)
 	mnuFile.add_command(label='Exit', command=raiz.destroy)
 
-	mnuHelp.add_command(label='Instruciones', command=instru)
+	mnuHelp.add_command(label='Instruciones', command=instructions)
 	mnuHelp.add_command(label='Versión', command=ver)
 
 	barraMenu.add_cascade(label="File", menu=mnuFile)
@@ -486,6 +516,7 @@ def main():
 	l_copyright = Label(raiz, text=text1, anchor='n', padx=2)
 	l_copyright.pack(side=BOTTOM)
 
+	# loop tkinter
 	raiz.mainloop()
 
 	if len(lis_dif) > 1:
