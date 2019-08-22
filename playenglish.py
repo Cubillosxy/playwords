@@ -34,7 +34,7 @@ try: #Python 2.x
 except ImportError:
 	# Python 3
 	from configparser import ConfigParser
-	import Random
+	import random
 
 import re
 
@@ -281,15 +281,14 @@ def pra(dicc, resp, n_actual):
 			else:
 				eng_play.set("No hay palabras")
 		else:
-			word_eng = _word[0]
-			_word_spa = random.randint(0, len(word_eng) - 1)
+			_word_spa = random.randint(1, (len(_word) - 1))
 			_word_spa = _word[_word_spa]
 			tkMessageBox.showinfo(
 				title="Incorrecto :(",
 				message="No coincide con  ningúna palabra \n  *Para saltar la palabra deja en blanco la respuesta  \n"
-				"HINT: {}".format(_word_spa[0:2] + '*'*len(_word_spa[2:]))
+				"HINT: {}".format(_word_spa[0:3] + '*'*len(_word_spa[3:]))
 			)
-			lis_dif.append(word_eng)
+			lis_dif.append(_word[0])
 			lis_ind_d.append(str(n_actual))
 	elif num_w > 1:
 		num_a = random.randint(1, num_w)

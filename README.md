@@ -34,6 +34,7 @@ docker-compose up
 
 # exec command in container
 docker exec -it playwords_play_1 bash
+docker exec -it playwords_play_1 ipython
 ```
 
 ### Run without docker
