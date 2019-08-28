@@ -186,7 +186,7 @@ def delete_word():
 			mygame.remove_section(result)
 			tkMessageBox.showinfo(
 				title='Deleted',
-				message='The above word was eliminated \n {}'.format(result)
+				message='The word above was eliminated \n {}'.format(result)
 			)
 		else:
 			tkMessageBox.showinfo(
