@@ -43,7 +43,7 @@ __version__ = '1.4'
 
 class Dicc:
 	def __init__(self):
-		# Instace ConfigParser and set filename
+		# Instance ConfigParser and set filename
 		self.config = ConfigParser()
 		self._filename = 'dicc.cfg'
 		self.sections = None
@@ -66,8 +66,15 @@ class Dicc:
 			with open(self._filename, "w") as f:
 				self.config.write(f)
 
-	def remove_section(self, word):
-		return self.config.remove_section(word)
+	def remove_word(self, word):
+		ind = self.config.getint('INDICE', 'cant')
+		result = self.config.remove_section(word)
+		if result:
+			self.config.set('INDICE', 'cant', str(ind - 1))
+
+		with open(self._filename, 'w') as f:
+			self.config.write(f)
+		return result
 
 	@staticmethod
 	def remove_space(word):
@@ -126,11 +133,14 @@ class Dicc:
 			self.config.write(f)
 		return response
 
-	def read(self, num):
+	def read(self, num, only_section=False):
 		sections = self.config.sections()
 		word_in_dicc = sections[num]
-		list1 = [word_in_dicc]
 
+		if only_section:
+			return word_in_dicc
+
+		list1 = [word_in_dicc]
 		for item in self.config.items(word_in_dicc):
 			# read text (word0, 'myword')
 			list1.append(item[1])
@@ -179,11 +189,14 @@ def reset_all():
 
 def delete_word():
 	result = askstring('Delete word and meanings ', 'Word')
-
 	if result:
-		remove_action = mygame.remove_section(result.lower())
+		result = result.lower()
+		# read the word show in screen game
+		actual_word_screen = mygame.read(num_a, only_section=True)
+		remove_action = mygame.remove_word(result)
 		if remove_action:
-			mygame.remove_section(result)
+			if actual_word_screen == result:
+				pra(mygame, resp='', n_actual='')
 			tkMessageBox.showinfo(
 				title='Deleted',
 				message='The word above was eliminated \n {}'.format(result)
@@ -225,10 +238,9 @@ def cal_pro(b_n, m_n, limit, rep):
 	:param rep: list with 1, times with the auto probability won
 	:return:
 	"""
-
 	if m_n >= b_n:
 		# fixed prob if correct word are >= that wrong count
-		res = 40
+		res = 60 if m_n * 2 >= limit else 40
 	else:
 		v1 = b_n - m_n + 1 - rep
 		res = v1 * 100 / limit
@@ -446,24 +458,24 @@ def main():
 
 	raiz.config(menu=barraMenu)
 
-	#Imagenes para botones
+	# Imagenes para botones
 	b1 = PhotoImage(file='biblio/add.ppm')
 	b2 = PhotoImage(file='biblio/pra.ppm')
 
-	#botones
+	# botones
 	bot_add = Button(f1, image=b1, command=lambda: w_write(mygame, eng_add.get(), esp_add.get()))
 	bot_practice = Button(f2, image=b2, command=lambda: pra(mygame, esp_res.get(), num_a))
 
 	#
 
-	#labels
+	# labels
 	l_en1 = Label(f1, text="ENGLISH :", anchor="n", padx=2)
 	txt_en1 = Entry(f1, textvariable=eng_add, width=15)
 	l_sp1 = Label(f1, text="ESPAÑOL :", anchor="n", padx=2)
 	txt_es1 = Entry(f1, textvariable=esp_add, width=15)
 
 	separ3 = ttk.Separator(f1, orient=HORIZONTAL)
-	l_inf1 = Label(f1,text="Separa las palabras por (,)", anchor="n", padx=2)
+	l_inf1 = Label(f1, text="Separa las palabras por (,)", anchor="n", padx=2)
 	separ4 = ttk.Separator(f1, orient=HORIZONTAL)
 
 	#
