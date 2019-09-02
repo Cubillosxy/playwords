@@ -6,7 +6,7 @@
 
 """
 try:
-	#Python 2.x
+	# Python 2.x
 	from ConfigParser import ConfigParser
 	import random
 	from Tkinter import Tk
@@ -148,7 +148,7 @@ class Dicc:
 		return list1
 
 	def num_dicc(self):
-		ind = self.config.getint("INDICE", "cant")
+		# ind = self.config.getint("INDICE", "cant")
 		self.sections = self.config.sections()
 		return len(self.sections) - 1
 
@@ -285,7 +285,7 @@ def pra(dicc, resp, n_actual):
 		resp = dicc.remove_space(resp)  # elimminamos espacio
 		resp = split_result(resp)    # si hay comas separamos en vector
 		_word = dicc.read(n_actual)
-		_result = comp_cade(_word, resp)
+		_result = compare_string(_word, resp)
 
 		print(_word, " w actul")
 		print("numero inte ", cont_var)
@@ -318,12 +318,21 @@ def pra(dicc, resp, n_actual):
 			else:
 				eng_play.set("No hay palabras")
 		else:
-			_word_spa = random.randint(1, (len(_word) - 1))
-			_word_spa = _word[_word_spa]
+			_word_spanish = random.randint(1, (len(_word) - 1))
+			_word_spanish = _word[_word_spanish]
+			len_word = len(_word_spanish)
+			
+			_hint = _word_spanish[0]
+			if len_word > 2:
+				_letters_hint = _word_spanish[0:3]
+				_default_hint = _letters_hint + '*' * len(_word_spanish[3:])
+				# 3 first letters and last 
+				_hint = (_default_hint[:-1] + _word_spanish[-1]) if len_word > 4 else _default_hint
+				
 			tkMessageBox.showinfo(
-				title="Incorrecto :(",
-				message="No coincide con  ningúna palabra \n  *Para saltar la palabra deja en blanco la respuesta  \n"
-				"HINT: {}".format(_word_spa[0:3] + '*'*len(_word_spa[3:]))
+				title='Incorrecto :(',
+				message='No coincide con  ningúna palabra \n  *Para saltar la palabra deja en blanco la respuesta  \n'
+				'HINT: {}'.format(_hint)
 			)
 			lis_dif.append(_word[0])
 			lis_ind_d.append(str(n_actual))
@@ -333,10 +342,10 @@ def pra(dicc, resp, n_actual):
 		word = dicc.read(num_a)
 		eng_play.set(word[0].upper())
 	else:
-		eng_play.set("No hay palabras")
+		eng_play.set('No hay palabras')
 
 
-def comp_cade(_word, resp):
+def compare_string(_word, resp):
 	for i in range(1, len(_word)):
 		if isinstance(resp, list):
 			if _word[i] in resp:
