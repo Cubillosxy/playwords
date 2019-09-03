@@ -402,6 +402,13 @@ def key(event):
 
 def main():
 
+	def pack_utils(*args):
+		# list comprehension for pack instances
+		return [
+			element.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
+			for element in args
+		]
+
 	# interfaz
 	raiz = Tk()
 	raiz.title("LEARN WORDS  V{}".format(__version__))
@@ -498,7 +505,7 @@ def main():
 		anchor="n",
 		width=10
 	)
-	l_inf2 = Label(f2, text="Español", anchor="n", padx=2)
+	# l_inf2 = Label(f2, text="Español", anchor="n", padx=2)
 	separ1 = ttk.Separator(f2, orient=HORIZONTAL)
 	l_sp3 = Label(f2, text="Separa las palabras por (,): ", anchor="n", padx=2)
 	separ2 = ttk.Separator(f2, orient=HORIZONTAL)
@@ -509,26 +516,19 @@ def main():
 
 	l_en1.pack(side=TOP, fill=BOTH, expand=True, padx=1, pady=1)
 	txt_en1.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=5)
-	l_sp1.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
-	txt_es1.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
-	separ3.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
-	l_inf1.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
-	separ4.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
+
+	pack_utils(l_sp1, txt_es1, separ3, l_inf1, separ4)
 
 	bot_practice.pack(side=TOP)
 	raiz.bind('<KeyPress>', key)  # '<KeyPress>
-	l_sp2.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
-	l_eng2.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
-	separ1.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
-	l_sp3.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
-	txt_res1.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
-	separ2.pack(side=BOTTOM, fill=BOTH, expand=True, padx=10, pady=5)
+
+	pack_utils(l_sp2, l_eng2, separ1, l_sp3, txt_res1, separ2)
 
 	#  frame- place
 	f2.pack(side=TOP)
 
-	separF = ttk.Separator(raiz, orient=HORIZONTAL)
-	separF.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
+	separator_copyright = ttk.Separator(raiz, orient=HORIZONTAL)
+	separator_copyright.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=5)
 	f1.pack(side=TOP)
 
 	#  COPYRIGHT
@@ -541,17 +541,14 @@ def main():
 	raiz.mainloop()
 
 	if len(lis_dif) > 1:
-		list_diff_str = ', '.join(lis_dif)
+		list_diff_str = ', '.join(list(set(lis_dif)))
 		tkMessageBox.showinfo(
 			title='Bien',
 			message='Te recomendamos practicar estas palabras \n {}'.format(list_diff_str)
 		)
 
-	lis_fin = []
-	for i in lis_bien:
-		lis_fin.append(int(i))  # pasar la lista a entera
-	lis_fin = sorted(lis_fin)   # ordenar la lista
-	print("bien :", lis_fin)
+	lis_fin = [int(i) for i in lis_bien]
+	print('bien :', sorted(lis_fin))
 
 
 if __name__ == '__main__':
