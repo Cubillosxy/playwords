@@ -11,3 +11,4 @@ services:
   volumes:
    - .:/code
    - /tmp/.X11-unix:/tmp/.X11-unix
+   - /home:/home

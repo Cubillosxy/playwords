@@ -14,7 +14,7 @@ Requirements:
 
 ##### Load sample dicc (optional)
 ```
-cp biblio/dicc\ 2.cfg dicc.cfg
+cp biblio/static_config_files/dicc\ 2.cfg biblio/static_config_files/dicc.cfg
 ```
 
 ### Docker
@@ -26,7 +26,7 @@ apt-get install x11-xserver-utils
 xhost +
 
 docker build -t playwords .
-docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/code playwords
+docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/code -v /home:/home playwords
 
 # with docker-compose
 docker-compose build

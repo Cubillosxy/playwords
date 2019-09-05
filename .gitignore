@@ -92,4 +92,4 @@ ENV/
 .idea
 
 # files
-dicc.cfg
+biblio/static_config_files/dicc.cfg
