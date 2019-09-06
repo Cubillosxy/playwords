@@ -23,6 +23,7 @@ try:
 	from Tkinter import BOTTOM
 	import ttk
 	import tkMessageBox
+	import tkFileDialog
 	from tkSimpleDialog import askstring
 	import sys
 	reload(sys)
@@ -34,19 +35,32 @@ except ImportError:
 	# Python 3
 	from configparser import ConfigParser
 	import random
+	import sys
 
 import re
-
+import os
+import shutil
+import ntpath
+import time
 
 __version__ = '1.4'
+ROOT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 
 class Dicc:
 	def __init__(self):
 		# Instance ConfigParser and set filename
 		self.config = ConfigParser()
-		self._filename = 'dicc.cfg'
+		self.static_path = os.path.join(ROOT_PATH, 'biblio', 'static_config_files')
+		self._filename = os.path.join(self.static_path, 'dicc.cfg')
 		self.sections = None
+		self.load_config()
+
+	def load_config_file(self, value):
+		self._filename = value
+		self.load_config()
+
+	def load_config(self):
 		self.config.read(self._filename)
 		sections = self.config.sections() 
 
@@ -157,7 +171,7 @@ class Dicc:
 def ver():
 	tkMessageBox.showinfo(
 		title="Versión {}".format(__version__),
-		message="Play Words \nDeveloped by: Edwin Cubillos  -> github.com/Cubillosxy \n Made in Monterrey,Colombia "
+		message="Play Words \nDeveloped by: Edwin Cubillos  -> https://github.com/Cubillosxy \n\nMade in Monterrey,Colombia "
 	)
 
 
@@ -206,6 +220,37 @@ def delete_word():
 				title='Error',
 				message='The word that you typed does not exist in dicc \n {}'.format(result)
 			)
+
+
+def upload_config_file():
+	is_windows = sys.platform.startswith('win')
+	root = 'C:\\' if is_windows else '/home'
+	filename = tkFileDialog.askopenfilename(
+		initialdir=root,
+		title='Select file',
+		filetypes=(('config files', '*.cfg'),)
+	)
+	if filename:
+		base_name = ntpath.basename(filename)
+		static_route = os.path.join(mygame.static_path, base_name)
+		shutil.copy(filename, static_route)
+		result = tkMessageBox.askquestion('Load file?', 'load?', icon='info')
+		if result:
+			if not os.path.exists(static_route):
+				time.sleep(3)
+			mygame.load_config_file(static_route)
+			pra(mygame, resp='', n_actual='')
+
+
+def load_config_file():
+	config = tkFileDialog.askopenfilename(
+		initialdir=mygame.static_path,
+		title='Select dictionary',
+		filetypes=(('config files', '*.cfg'),)
+	)
+	if config:
+		mygame.load_config_file(config)
+		pra(mygame, resp='', n_actual='')
 
 
 def get_num_not_repeat(max1, list_ok):
@@ -462,6 +507,8 @@ def main():
 	
 	mnuFile = Menu(barraMenu)
 	mnuHelp = Menu(barraMenu)
+	mnuFile.add_command(label='Load dictionary', command=load_config_file)
+	mnuFile.add_command(label='Upload new dictionary', command=upload_config_file)
 	mnuFile.add_command(label='Delete word', command=delete_word)
 	mnuFile.add_command(label='Reset', command=reset_all)
 	mnuFile.add_command(label='Exit', command=raiz.destroy)
