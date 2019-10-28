@@ -61,23 +61,24 @@ class Dicc:
 		self.load_config()
 
 	def load_config(self):
+		self.config = ConfigParser()
 		self.config.read(self._filename)
 		sections = self.config.sections() 
 
 		val = len(sections)
 
 		try:
-			self.config.getint("INDICE", "cant")
-			self.config.set("INDICE", "cant", str(val-1))
+			self.config.getint('INDICE', 'cant')
+			self.config.set('INDICE', 'cant', str(val-1))
 			# pass content to config instance
-			with open(self._filename, "w") as f:
+			with open(self._filename, 'w') as f:
 				self.config.write(f)
 		except Exception as e:
 			# error reading dicc.cfg
 			print(repr(e))
-			self.config.add_section("INDICE")   # add word
-			self.config.set("INDICE", "cant", "0")
-			with open(self._filename, "w") as f:
+			self.config.add_section('INDICE')   # add word
+			self.config.set('INDICE', 'cant', '0')
+			with open(self._filename, 'w') as f:
 				self.config.write(f)
 
 	def remove_word(self, word):
@@ -102,7 +103,7 @@ class Dicc:
 		:return: dict with result
 		"""
 
-		ind = self.config.getint("INDICE", "cant")
+		ind = self.config.getint('INDICE', 'cant')
 		sections = self.config.sections() 
 
 		word = self.remove_space(word)
@@ -134,7 +135,7 @@ class Dicc:
 
 		else:
 			# increment Index
-			self.config.set("INDICE", "cant", str(ind + 1))
+			self.config.set('INDICE', 'cant', str(ind + 1))
 			self.config.add_section(word)  # adicionamos palabra
 
 			response = {'title': 'OK', 'message': 'Se agrego correctamente \n   {}'.format(word)}
@@ -143,7 +144,7 @@ class Dicc:
 				i = self.remove_space(i)
 				self.config.set(word, 'word{}'.format(count), i)
 
-		with open(self._filename, "w") as f:
+		with open(self._filename, 'w') as f:
 			self.config.write(f)
 		return response
 
@@ -162,7 +163,7 @@ class Dicc:
 		return list1
 
 	def num_dicc(self):
-		# ind = self.config.getint("INDICE", "cant")
+		# ind = self.config.getint('INDICE', 'cant')
 		self.sections = self.config.sections()
 		return len(self.sections) - 1
 
@@ -170,17 +171,17 @@ class Dicc:
 #  funcion de menu versión
 def ver():
 	tkMessageBox.showinfo(
-		title="Versión {}".format(__version__),
-		message="Play Words \nDeveloped by: Edwin Cubillos  -> https://github.com/Cubillosxy \n\nMade in Monterrey,Colombia "
+		title='Versión {}'.format(__version__),
+		message='Play Words \nDeveloped by: Edwin Cubillos  -> https://github.com/Cubillosxy \n\nMade in Monterrey,Colombia '
 	)
 
 
 #  función de menú instruciones
 def instructions():
 	tkMessageBox.showinfo(
-		title="Instrucciones",
-		message="-Escribe el significado de la palabra y presiona enter para validar \n -Para agregar nuevas palabras , "
-		"ingresa la palabra y sus significados después da clic en guardar \n - "
+		title='Instrucciones',
+		message='-Escribe el significado de la palabra y presiona enter para validar \n -Para agregar nuevas palabras , '
+		'ingresa la palabra y sus significados después da clic en guardar \n - '
 	)
 
 
@@ -196,9 +197,9 @@ def reset_all():
 	lis_rep = []
 	cont_var = 0
 
-	print("Juego reiniciado")
+	print('Juego reiniciado')
 
-	tkMessageBox.showinfo(title="Vuelve a iniciar :)", message=" Los valores han sido reseteados  ")
+	tkMessageBox.showinfo(title='Vuelve a iniciar :)', message=' Los valores han sido reseteados  ')
 
 
 def delete_word():
@@ -250,6 +251,16 @@ def load_config_file():
 	)
 	if config:
 		mygame.load_config_file(config)
+		pra(mygame, resp='', n_actual='')
+
+
+def new_empty_config_file():
+	result = askstring('Enter name of dictionary ', 'Name')
+	if result:
+		filename = result if result.endswith('.cfg') else '{}.cfg'.format(result)
+		static_route = os.path.join(mygame.static_path, filename)
+		open(static_route, 'a').close()
+		mygame.load_config_file(static_route)
 		pra(mygame, resp='', n_actual='')
 
 
@@ -320,11 +331,11 @@ def pra(dicc, resp, n_actual):
 	# calc prob of wrong words
 	# this probability raise with each wrong typed answer
 	prob_wrong = cal_pro(len(lis_bien), len(lis_ind_d), num_w, len(lis_rep))
-	print("La probailidad es ", (100-prob_wrong), " %")
+	print('La probailidad es ', (100-prob_wrong), ' %')
 
 	if cont_var > 40:
 		cont_var = 0
-		print("Reset contador")
+		print('Reset contador')
 
 	if resp and is_not_number:
 		resp = dicc.remove_space(resp)  # elimminamos espacio
@@ -332,15 +343,15 @@ def pra(dicc, resp, n_actual):
 		_word = dicc.read(n_actual)
 		_result = compare_string(_word, resp)
 
-		print(_word, " w actul")
-		print("numero inte ", cont_var)
+		print(_word, ' w actul')
+		print('numero inte ', cont_var)
 
 		_agg = True
 		if _result:
 
 			# guardamos lo que van bien para que no salgan
 			lis_bien.append(str(n_actual))
-			esp_res.set("")
+			esp_res.set('')
 			if num_w > 1:
 				# list of wrong index words
 				l_lisdi = len(lis_dif)
@@ -350,7 +361,7 @@ def pra(dicc, resp, n_actual):
 						print(random_probability, ' no azar - prob :{}'.format(prob_wrong))
 						ind_noazar = random.randint(0, (l_lisdi-1))
 						num_a = int(lis_ind_d[ind_noazar])
-						lis_rep.append("1")
+						lis_rep.append('1')
 					else:
 						num_a = get_num_not_repeat(num_w, lis_bien)
 						cont_var -= 1
@@ -361,7 +372,7 @@ def pra(dicc, resp, n_actual):
 				word = dicc.read(num_a)   # leemos lista en el dicc
 				eng_play.set(word[0].upper())
 			else:
-				eng_play.set("No hay palabras")
+				eng_play.set('No hay palabras')
 		else:
 			_word_spanish = random.randint(1, (len(_word) - 1))
 			_word_spanish = _word[_word_spanish]
@@ -409,7 +420,7 @@ def search_num(word):
 
 
 def split_result(word):
-	return list(set(filter(None, word.split(","))))
+	return list(set(filter(None, word.split(','))))
 
 
 def w_write(dicc_class, eng, spa):
@@ -456,15 +467,15 @@ def main():
 
 	# interfaz
 	raiz = Tk()
-	raiz.title("LEARN WORDS  V{}".format(__version__))
+	raiz.title('LEARN WORDS  V{}'.format(__version__))
 	width = 240
 	higth = 460
-	raiz.geometry(str(width)+"x"+str(higth))
+	raiz.geometry(str(width)+'x'+str(higth))
 	# raiz.configure(background='white')
 
 	h_pc = raiz.winfo_screenheight()
 	w_pc = raiz.winfo_screenwidth()
-	raiz.geometry("+%d+%d" % ((w_pc/2-width/2), (h_pc/2-higth/2-20)))
+	raiz.geometry('+%d+%d' % ((w_pc/2-width/2), (h_pc/2-higth/2-20)))
 
 	f1 = Frame(raiz)		# contenedores
 	f2 = Frame(raiz)
@@ -499,7 +510,7 @@ def main():
 		word = mygame.read(num_a)
 		eng_play.set(word[0].upper())
 	else:
-		eng_play.set("No hay palabras")
+		eng_play.set('No hay palabras')
 
 	# MENU BAR
 
@@ -507,6 +518,8 @@ def main():
 	
 	mnuFile = Menu(barraMenu)
 	mnuHelp = Menu(barraMenu)
+
+	mnuFile.add_command(label='Create new empty dictionary', command=new_empty_config_file)
 	mnuFile.add_command(label='Load dictionary', command=load_config_file)
 	mnuFile.add_command(label='Upload new dictionary', command=upload_config_file)
 	mnuFile.add_command(label='Delete word', command=delete_word)
@@ -516,8 +529,8 @@ def main():
 	mnuHelp.add_command(label='Instruciones', command=instructions)
 	mnuHelp.add_command(label='Versión', command=ver)
 
-	barraMenu.add_cascade(label="File", menu=mnuFile)
-	barraMenu.add_cascade(label="Help", menu=mnuHelp)
+	barraMenu.add_cascade(label='File', menu=mnuFile)
+	barraMenu.add_cascade(label='Help', menu=mnuHelp)
 
 	raiz.config(menu=barraMenu)
 
@@ -532,29 +545,29 @@ def main():
 	#
 
 	# labels
-	l_en1 = Label(f1, text="ENGLISH :", anchor="n", padx=2)
+	l_en1 = Label(f1, text='ENGLISH :', anchor='n', padx=2)
 	txt_en1 = Entry(f1, textvariable=eng_add, width=15)
-	l_sp1 = Label(f1, text="ESPAÑOL :", anchor="n", padx=2)
+	l_sp1 = Label(f1, text='ESPAÑOL :', anchor='n', padx=2)
 	txt_es1 = Entry(f1, textvariable=esp_add, width=15)
 
 	separ3 = ttk.Separator(f1, orient=HORIZONTAL)
-	l_inf1 = Label(f1, text="Separa las palabras por (,)", anchor="n", padx=2)
+	l_inf1 = Label(f1, text='Separa las palabras por (,)', anchor='n', padx=2)
 	separ4 = ttk.Separator(f1, orient=HORIZONTAL)
 
 	#
-	l_sp2 = Label(f2, text="Escribe el Significado de: ", anchor="n", padx=2)
+	l_sp2 = Label(f2, text='Escribe el Significado de: ', anchor='n', padx=2)
 	l_eng2 = Label(
 		f2,
 		textvariable=eng_play,
-		foreground="black",
-		background="white",
+		foreground='black',
+		background='white',
 		borderwidth=5,
-		anchor="n",
+		anchor='n',
 		width=10
 	)
-	# l_inf2 = Label(f2, text="Español", anchor="n", padx=2)
+	# l_inf2 = Label(f2, text='Español', anchor='n', padx=2)
 	separ1 = ttk.Separator(f2, orient=HORIZONTAL)
-	l_sp3 = Label(f2, text="Separa las palabras por (,): ", anchor="n", padx=2)
+	l_sp3 = Label(f2, text='Separa las palabras por (,): ', anchor='n', padx=2)
 	separ2 = ttk.Separator(f2, orient=HORIZONTAL)
 	txt_res1 = Entry(f2, textvariable=esp_res, width=15) 
 
