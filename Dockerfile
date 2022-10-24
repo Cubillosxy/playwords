@@ -12,6 +12,7 @@ RUN apt-get install x11-xserver-utils -y
 RUN apt-get install python-tk -y
 RUN pip install ipython
 RUN pip install ipdb
+RUN pip install pyinstaller
 RUN mkdir /code
 WORKDIR /code
 ADD . .
